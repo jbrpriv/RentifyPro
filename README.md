@@ -364,13 +364,13 @@ Place the `stripe.exe` (Windows) or `stripe` (Mac/Linux) binary somewhere on you
 When the listener starts, you'll see output like this:
 
 ```
-> Ready! Your webhook signing secret is whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx (^C to quit)
+> Ready! Your webhook signing secret is  (^C to quit)
 ```
 
-Copy that `whsec_...` value and paste it into your `server/.env` as:
+Copy that `secret` value and paste it into your `server/.env` as:
 
 ```env
-STRIPE_WEBHOOK_SECRET=whsec_xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+STRIPE_WEBHOOK_SECRET
 ```
 
 Then restart the backend server. Stripe payment events (successful charges, failures, etc.) will now be received at `POST /api/webhooks` during local development.
