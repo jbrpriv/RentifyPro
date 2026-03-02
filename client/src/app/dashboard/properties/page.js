@@ -1,11 +1,25 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import api from '@/utils/api';
 import { Building2, MapPin, Plus, FileText, Loader2, UserPlus, CheckCircle, Clock } from 'lucide-react';
 
 export default function PropertiesPage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (!['landlord','admin'].includes(parsed.role)) {
+      router.push('/dashboard');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [properties, setProperties] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [inviting, setInviting]     = useState('');

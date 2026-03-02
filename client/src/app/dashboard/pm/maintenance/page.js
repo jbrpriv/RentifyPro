@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { Wrench, Plus, Loader2, ChevronDown, ChevronUp, CheckCircle, Clock, AlertCircle, X } from 'lucide-react';
 
@@ -18,6 +19,19 @@ const PRIORITY_CONFIG = {
 const CATEGORIES = ['plumbing','electrical','hvac','appliance','structural','pest','other'];
 
 export default function MaintenancePage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (!['property_manager','admin'].includes(parsed.role)) {
+      router.push('/dashboard');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [user, setUser]             = useState(null);
   const [requests, setRequests]     = useState([]);
   const [loading, setLoading]       = useState(true);

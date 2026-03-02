@@ -6,7 +6,8 @@ const messageSchema = mongoose.Schema(
     property: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Property',
-      required: true,
+      required: false, // Optional — admin/law_reviewer messages have no property context
+      default: null,
     },
     agreement: {
       type: mongoose.Schema.Types.ObjectId,

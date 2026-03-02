@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { CreditCard, CheckCircle, Clock, AlertCircle, Loader2, Calendar } from 'lucide-react';
 
@@ -14,6 +15,19 @@ const STATUS_CONFIG = {
 const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
 
 export default function PaymentsPage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed.role !== 'tenant') {
+      router.push('/dashboard/agreements');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [agreements, setAgreements] = useState([]);
   const [selected, setSelected]     = useState(null);
   const [loading, setLoading]       = useState(true);

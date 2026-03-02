@@ -8,7 +8,7 @@ const {
   getUnreadCount,
   deleteMessage,
 } = require('../controllers/messageController');
-const { body } = require('express-validator');
+const { body, validationResult } = require('express-validator');
 
 // Inbox (all conversations)
 router.get('/', protect, getInbox);
@@ -21,10 +21,16 @@ router.post(
   '/',
   protect,
   [
-    body('propertyId').notEmpty().withMessage('Property ID is required'),
     body('receiverId').notEmpty().withMessage('Receiver ID is required'),
     body('content').trim().notEmpty().withMessage('Message content cannot be empty'),
   ],
+  (req, res, next) => {
+    const errors = validationResult(req);
+    if (!errors.isEmpty()) {
+      return res.status(400).json({ message: errors.array()[0].msg });
+    }
+    next();
+  },
   sendMessage
 );
 

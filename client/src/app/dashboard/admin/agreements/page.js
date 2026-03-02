@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import {
   FileText, Search, Filter, Loader2, AlertCircle,
@@ -28,6 +29,19 @@ function StatusBadge({ status }) {
 }
 
 export default function AdminAgreementsPage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed.role !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState('');

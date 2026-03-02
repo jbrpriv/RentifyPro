@@ -17,12 +17,32 @@ const createAgreement = async (req, res) => {
       return res.status(403).json({ message: 'Not authorized to lease this property' });
     }
 
-    // 2. Create Agreement Record
+    // 2. Validate tenant exists and has the correct role (Bug 7 / M4)
+    const tenant = await User.findById(tenantId);
+    if (!tenant) {
+      return res.status(404).json({ message: 'Tenant not found' });
+    }
+    if (tenant.role !== 'tenant') {
+      return res.status(400).json({ message: 'Provided userId does not belong to a tenant account' });
+    }
+
+    // 3. Compute lease duration in months (Bug 2 / C2)
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const durationMonths =
+      (end.getFullYear() - start.getFullYear()) * 12 +
+      (end.getMonth() - start.getMonth());
+
+    if (durationMonths <= 0) {
+      return res.status(400).json({ message: 'endDate must be after startDate' });
+    }
+
+    // 4. Create Agreement Record
     const agreement = await Agreement.create({
       landlord: req.user._id,
       tenant: tenantId,
       property: propertyId,
-      term: { startDate, endDate },
+      term: { startDate, endDate, durationMonths },
       financials: { rentAmount, depositAmount },
       auditLog: [{
         action: 'CREATED',

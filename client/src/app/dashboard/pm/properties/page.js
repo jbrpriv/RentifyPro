@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { Building2, Loader2, MapPin, Users, CheckCircle, XCircle, Clock, Bell } from 'lucide-react';
 
@@ -11,6 +12,19 @@ const STATUS_COLORS = {
 };
 
 export default function PMPropertiesPage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (!['property_manager','admin'].includes(parsed.role)) {
+      router.push('/dashboard');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [properties,   setProperties]   = useState([]);
   const [invitations,  setInvitations]  = useState([]);
   const [loading,      setLoading]      = useState(true);

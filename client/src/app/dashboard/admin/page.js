@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import {
   Users, FileText, Building2, CreditCard, Wrench, TrendingUp,
@@ -14,6 +15,19 @@ import {
 const PIE_COLORS = ['#3b82f6','#6366f1','#f59e0b','#10b981','#8b5cf6'];
 
 export default function AdminStatsPage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed.role !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [stats, setStats]   = useState(null);
   const [loading, setLoading] = useState(true);
 

@@ -128,4 +128,5 @@ connectDB().then(() => {
   });
 });
 
-module.exports = app;
+// M9 fix: preserve io/onlineUsers exports — do not overwrite with app
+module.exports.app = app;

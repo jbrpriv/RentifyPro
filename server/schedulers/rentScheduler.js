@@ -89,12 +89,17 @@ const startRentScheduler = () => {
         if (lateFeeAmount === 0) continue; // Skip if no late fee configured
 
         for (const entry of agreement.rentSchedule) {
-          if (entry.status !== 'pending') continue;
+          if (entry.status !== 'pending' && entry.status !== 'overdue') continue;
 
           const dueDate = new Date(entry.dueDate);
           dueDate.setHours(0, 0, 0, 0);
 
           const daysPastDue = Math.floor((today - dueDate) / (1000 * 60 * 60 * 24));
+
+          // Snapshot the status BEFORE any in-memory mutations this iteration.
+          // This prevents the late-fee block from immediately firing on an entry
+          // that was just flipped to 'overdue' in the same loop pass (Bug 4).
+          const statusBeforeThisRun = entry.status;
 
           // Mark as overdue as soon as it's past due date
           if (daysPastDue > 0 && entry.status === 'pending') {
@@ -112,10 +117,12 @@ const startRentScheduler = () => {
             );
           }
 
-          // Apply late fee after grace period
+          // Apply late fee after grace period — but ONLY if the entry was
+          // already 'overdue' before the current scheduler run began.
+          // This ensures tenants always see a grace-period window (Bug 4).
           if (
             daysPastDue > gracePeriodDays &&
-            entry.status === 'overdue' &&
+            statusBeforeThisRun === 'overdue' &&
             !entry.lateFeeApplied
           ) {
             entry.lateFeeApplied = true;

@@ -1,10 +1,12 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import { FileText, Download, Calendar, User, Loader2, CheckCircle, Clock, PenLine } from 'lucide-react';
 
 export default function AgreementsPage() {
+  const router = useRouter();
   const [agreements, setAgreements] = useState([]);
   const [loading, setLoading] = useState(true);
   const [signingId, setSigningId]     = useState(null);
@@ -15,9 +17,12 @@ export default function AgreementsPage() {
 
   useEffect(() => {
     const stored = localStorage.getItem('userInfo');
-    if (stored) setCurrentUser(JSON.parse(stored));
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed.role === 'tenant') { router.push('/dashboard/my-lease'); return; }
+    setCurrentUser(parsed);
     fetchAgreements();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   const fetchAgreements = async () => {
     try {

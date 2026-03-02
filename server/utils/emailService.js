@@ -131,6 +131,36 @@ const templates = {
     `)
     }),
 
+    // Rent OVERDUE notice (urgent — tenant is already late)
+    rentOverdue: (tenantName, propertyTitle, amount, dueDate) => ({
+        subject: `⚠️ Rent Overdue - Immediate Action Required - ${propertyTitle}`,
+        html: baseTemplate(`
+      <h2 style="color:#dc2626;">Hello ${tenantName},</h2>
+      <p>Your rent payment is <strong>overdue</strong>. Please make payment immediately to avoid additional late fees.</p>
+      <div class="detail-box" style="border-left: 4px solid #dc2626;">
+        <strong>Property:</strong> ${propertyTitle}<br/>
+        <strong>Overdue Amount:</strong> Rs. ${Number(amount).toLocaleString()}<br/>
+        <strong>Original Due Date:</strong> ${new Date(dueDate).toDateString()}
+      </div>
+      <p style="color:#dc2626;"><strong>Failure to pay may result in late fees and affect your tenancy.</strong></p>
+      <a href="${process.env.CLIENT_URL}/dashboard/payments" class="button" style="background:#dc2626;">Pay Now</a>
+    `)
+    }),
+
+    // Payment failed — prompt tenant to retry
+    paymentFailed: (tenantName, agreementId) => ({
+        subject: '❌ Payment Failed - Action Required',
+        html: baseTemplate(`
+      <h2 style="color:#dc2626;">Hello ${tenantName},</h2>
+      <p>Your recent payment attempt was <strong>unsuccessful</strong>.</p>
+      <p>Please update your payment details and try again to keep your rental agreement active.</p>
+      <div class="detail-box" style="border-left: 4px solid #dc2626;">
+        <strong>Agreement ID:</strong> ${agreementId}
+      </div>
+      <a href="${process.env.CLIENT_URL}/dashboard/my-lease" class="button" style="background:#dc2626;">Retry Payment</a>
+    `)
+    }),
+
     // Welcome email on registration
     welcome: (userName, role) => ({
         subject: 'Welcome to RentifyPro!',

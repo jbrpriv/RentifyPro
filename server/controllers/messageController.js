@@ -157,9 +157,11 @@ const getInbox = async (req, res) => {
       ]
     );
 
-    // Zip back unread counts
+    // Zip back unread counts.
+    // populated contains plain objects (from aggregate), not Mongoose Documents,
+    // so .toObject() does not exist — spread directly instead.
     const result = populated.map((msg, i) => ({
-      ...msg.toObject(),
+      ...(msg.toObject ? msg.toObject() : msg),
       unreadCount: conversations[i].unreadCount,
     }));
 

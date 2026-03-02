@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
+import { useRouter } from 'next/navigation';
 import api from '@/utils/api';
 import {
   Building2, Search, Loader2, UserMinus, CheckCircle,
@@ -15,6 +16,19 @@ const STATUS_STYLES = {
 };
 
 export default function AdminPropertiesPage() {
+  const router = useRouter();
+  // ── Role guard ────────────────────────────────────────────────────────────
+  useEffect(() => {
+    const stored = localStorage.getItem('userInfo');
+    if (!stored) { router.push('/login'); return; }
+    const parsed = JSON.parse(stored);
+    if (parsed.role !== 'admin') {
+      router.push('/dashboard');
+      return;
+    }
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // ─────────────────────────────────────────────────────────────────────────
+
   const [properties, setProperties] = useState([]);
   const [loading, setLoading]       = useState(true);
   const [search, setSearch]         = useState('');

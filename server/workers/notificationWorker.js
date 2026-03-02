@@ -82,7 +82,7 @@ const notificationWorker = new Worker(
 
         await sendEmail(
           tenant.email,
-          'rentDueReminder', // Reuse template, overdue version
+          'rentOverdue',
           tenant.name,
           property.title,
           financials.rentAmount,
@@ -175,6 +175,35 @@ const notificationWorker = new Worker(
 
         if (tenantSmsOptIn && tenantPhone) {
           await sendSMS(tenantPhone, 'applicationRejected', propertyTitle);
+        }
+        break;
+      }
+
+      case 'MAINTENANCE_RECEIVED': {
+        const {
+          landlordEmail, landlordPhone, landlordSmsOptIn,
+          tenantName, propertyTitle, requestTitle,
+        } = data;
+
+        await sendEmail(
+          landlordEmail,
+          'newMaintenanceRequest',
+          // recipientName not available — use a generic fallback
+          'Landlord',
+          tenantName,
+          propertyTitle,
+          requestTitle,
+          'medium'
+        );
+
+        if (landlordSmsOptIn && landlordPhone) {
+          await sendSMS(
+            landlordPhone,
+            'maintenanceReceived',
+            propertyTitle,
+            requestTitle,
+            tenantName
+          );
         }
         break;
       }

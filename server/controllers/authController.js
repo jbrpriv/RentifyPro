@@ -261,20 +261,9 @@ const validate2FALogin = async (req, res) => {
 };
 
 // ─── GOOGLE OAUTH ─────────────────────────────────────────────────────────────
-const googleCallback = async (req, res) => {
-  try {
-    const user = req.user;
-    if (!user) return res.redirect(`${process.env.CLIENT_URL}/login?error=oauth_failed`);
-    const accessToken  = generateAccessToken(user._id);
-    const refreshToken = generateRefreshToken(user._id);
-    setRefreshCookie(res, refreshToken);
-    // Check if profile is complete (Google users get placeholder phone)
-    const profileComplete = user.phoneNumber !== '0000000000' && user.isPhoneVerified;
-    res.redirect(`${process.env.CLIENT_URL}/auth/google/success?token=${accessToken}&name=${encodeURIComponent(user.name)}&role=${user.role}&id=${user._id}&email=${encodeURIComponent(user.email)}&profileComplete=${profileComplete}&isPhoneVerified=${user.isPhoneVerified}`);
-  } catch {
-    res.redirect(`${process.env.CLIENT_URL}/login?error=oauth_error`);
-  }
-};
+// NOTE: Google OAuth callback is handled inline in authRoutes.js via
+// passport.authenticate(). This file intentionally has no googleCallback export
+// to avoid dead-code divergence. See authRoutes.js for the full OAuth flow.
 
 // ─── FCM TOKEN ────────────────────────────────────────────────────────────────
 const registerFCMToken = async (req, res) => {
@@ -292,5 +281,5 @@ module.exports = {
   forgotPassword, resetPassword,
   sendPhoneOTP, verifyPhoneOTP,
   setup2FA, verify2FA, disable2FA, send2FADisableOTP, validate2FALogin,
-  googleCallback, registerFCMToken,
+  registerFCMToken,
 };

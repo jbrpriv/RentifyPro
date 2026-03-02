@@ -181,7 +181,41 @@ const handleStripeWebhook = async (req, res) => {
   if (event.type === 'payment_intent.payment_failed') {
     const paymentIntent = event.data.object;
     console.error(`❌ Payment failed: ${paymentIntent.id}`);
-    // TODO: Notify tenant of failed payment and prompt retry
+
+    // Find the agreement linked to this payment intent via the checkout session metadata
+    const sessions = await stripe.checkout.sessions.list({
+      payment_intent: paymentIntent.id,
+      limit: 1,
+    });
+
+    const session = sessions.data[0];
+    if (session?.metadata?.agreementId) {
+      const failedAgreement = await Agreement.findById(session.metadata.agreementId)
+        .populate('tenant', 'name email phoneNumber smsOptIn');
+
+      if (failedAgreement?.tenant) {
+        const { tenant } = failedAgreement;
+
+        // Notify tenant by email
+        sendEmail(
+          tenant.email,
+          'paymentFailed',
+          tenant.name,
+          session.metadata.agreementId
+        );
+
+        // Notify tenant by SMS if opted in
+        if (tenant.smsOptIn && tenant.phoneNumber) {
+          sendSMS(
+            tenant.phoneNumber,
+            'paymentFailed',
+            session.metadata.agreementId
+          );
+        }
+
+        console.log(`📧 Payment failure notification sent to tenant ${tenant.email}`);
+      }
+    }
   }
 
   res.json({ received: true });

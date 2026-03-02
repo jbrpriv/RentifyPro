@@ -78,7 +78,10 @@ export default function DashboardLayout({ children }) {
   useEffect(() => {
     const stored = localStorage.getItem('userInfo');
     if (!stored) { router.push('/login'); } else { setUser(JSON.parse(stored)); }
-  }, [router]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  // router is intentionally excluded — this auth check must run once on mount only.
+  // Including router causes an infinite re-render loop because Next.js recreates
+  // the router object on every render.
 
   if (!user) return (
     <div className="h-screen flex items-center justify-center bg-white">

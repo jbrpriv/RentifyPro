@@ -104,7 +104,7 @@ const getContacts = async (req, res) => {
 
     if (role === 'landlord') {
       // Landlord sees: active tenants + their PMs
-      const agreements = await Agreement.find({ landlord: userId, status: 'active' })
+      const agreements = await Agreement.find({ landlord: userId, status: { $in: ['active', 'signed', 'sent'] } })
         .populate('tenant', 'name email role profilePhoto')
         .populate('property', 'title _id');
       const properties = await Property.find({ landlord: userId, managedBy: { $ne: null } })
@@ -126,7 +126,7 @@ const getContacts = async (req, res) => {
 
     } else if (role === 'tenant') {
       // Tenant sees: landlord of active lease + PM of that property (if any)
-      const agreements = await Agreement.find({ tenant: userId, status: 'active' })
+      const agreements = await Agreement.find({ tenant: userId, status: { $in: ['active', 'signed', 'sent'] } })
         .populate('landlord', 'name email role profilePhoto')
         .populate('property', 'title _id');
 
